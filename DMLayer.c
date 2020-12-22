@@ -192,3 +192,4 @@ bool DMLayer_ObserveVariable (DMLayer* pDMLayer, const char* pszVariableName, si
 
     return nReturn;
 }
+
