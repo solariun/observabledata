@@ -60,9 +60,13 @@ typedef struct
  */
 
 
+extern void DMLayer_YeldContext();
+
 DMLayer* DMLayer_CreateInstance();
 
 ObsVariable* DMLayer_CreateVariable (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize);
+
+ObsVariable* DMLayer_GetVariable (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize);
 
 void DMLayer_PrintVariables (DMLayer* pDMLayer);
 

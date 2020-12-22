@@ -13,8 +13,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <sys/errno.h>
 #include <errno.h>
+#include <stdbool.h>
 
 #include "DMLayer.h"
 
@@ -22,6 +22,7 @@ struct Observable
 {
     uint8_t obsType;
     void* event;
+    bool bEvent;
     Observable* pPrev;
 };
 
@@ -37,6 +38,7 @@ struct ObsVariable
     uint32_t    nVariableID;
     char*       pszValue;
     uint8_t     nVarType;
+    uint8_t     nLastEventPoint;
 
     ObsVariable* pPrev;    
 };
@@ -93,9 +95,12 @@ ObsVariable* DMLayer_CreateVariable (DMLayer* pDMLayer, const char* pszVariableN
     VERIFY (NULL != pszVariableName && '\0' != pszVariableName[0], "Variable is null or empty.", NULL);
     VERIFY ((pVariable = malloc (sizeof (ObsVariable))) != NULL, "", NULL);
 
+    VERIFY (DMLayer_GetVariable (pDMLayer, pszVariableName, nVariableSize) == NULL, "Variable already exist, and will not be added", NULL);
+
     pVariable->nVariableID = DMLayer_GetVariableID(pszVariableName, nVariableSize);
     pVariable->nVarType = VAR_TYPE_NONE;
     pVariable->pszValue = NULL;
+    pVariable->nLastEventPoint = 0;
     pVariable->pPrev = pDMLayer->pObsVariables;
 
     pDMLayer->pObsVariables = pVariable;
@@ -133,9 +138,18 @@ ObsVariable* DMLayer_GetVariable (DMLayer* pDMLayer, const char* pszVariableName
 
     {
         uint32_t nTargetID = DMLayer_GetVariableID(pszVariableName, nVariableSize);
-
-        
+        ObsVariable* pVariable = pDMLayer->pObsVariables;
+        while (pVariable != NULL)
+        {
+            if (pVariable->nVariableID == nTargetID)
+            {
+                return pVariable;
+            }
+            pVariable = pVariable->pPrev;
+        }
     }
+
+    return NULL;
 }
 
 DMLayer* DMLayer_CreateInstance()
@@ -149,3 +163,32 @@ DMLayer* DMLayer_CreateInstance()
     return pDMLayer;
 }
 
+bool DMLayer_ObserveVariable (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize)
+{
+    VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", NULL);
+    VERIFY (NULL != pszVariableName && '\0' != pszVariableName[0], "Variable is null or empty.", NULL);
+
+    {
+        ObsVariable* pVariable;
+        uint8_t nLastEvent;
+        bool nReturn = false;
+
+        VERIFY ((pVariable = DMLayer_GetVariable (pDMLayer, pszVariableName, nVariableSize)) != NULL, "Variable already exist, and will not be added", NULL);
+
+        nLastEvent = pVariable->nLastEventPoint;
+
+        do
+        {
+            if (pVariable->nLastEventPoint != nLastEvent)
+            {
+                nReturn = true;
+                break;
+            }
+
+            DMLayer_YeldContext ();
+
+        } while ((pVariable = DMLayer_GetVariable (pDMLayer, pszVariableName, nVariableSize)) != NULL);
+    }
+
+    return nReturn;
+}

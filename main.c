@@ -42,6 +42,12 @@ static void StackOverflowHandler ()
 
 DMLayer* pDMLayer = NULL;
 
+void DMLayer_YeldContext()
+{
+    usleep (300000); //300 milleseconds
+    return;
+}
+
 int main ()
 {
 
@@ -68,6 +74,8 @@ int main ()
         DMLayer_CreateVariable (pDMLayer, "Variable 2", 10);
 
         DMLayer_CreateVariable (pDMLayer, "Variable 3", 10);
+
+        DMLayer_CreateVariable (pDMLayer, "Variable 4", 10);
 
         DMLayer_CreateVariable (pDMLayer, "Variable 4", 10);
 
