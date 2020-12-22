@@ -33,11 +33,11 @@
 CC = gcc
 
 # define any compile-time flags
-CFLAGS = -Wall -g --std=c89
+CFLAGS = -Wall -g 
 
 # define any directories containing header files other than /usr/include
 #
-INCLUDES = -I../../
+INCLUDES = -ICorePartition/
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
@@ -50,7 +50,7 @@ INCLUDES = -I../../
 #LIBS = -lmylib -lm
 
 # define the C source files
-SRCS = $(wildcard *.c) $(wildcard ../../*.c)
+SRCS = $(wildcard *.c) $(wildcard ./CorePartition/*.c)
 
 # define the C object files 
 #
@@ -63,7 +63,7 @@ SRCS = $(wildcard *.c) $(wildcard ../../*.c)
 OBJS = $(SRCS:.c=.o)
 
 # define the executable file 
-MAIN = CorePartition.bin
+MAIN = dmlayer_demo.bin
 
 #
 # The following part of the makefile is generic; it can be used to 
@@ -74,7 +74,7 @@ MAIN = CorePartition.bin
 .PHONY: depend clean
 
 all:    $(MAIN)
-	@echo  CorePartition has beem compilled
+	@echo  DWLayer demo has beem compilled
 
 $(MAIN): $(OBJS) 
 	$(CC) $(CFLAGS) $(INCLUDES) -o $(MAIN) $(OBJS) $(LFLAGS) $(LIBS)
