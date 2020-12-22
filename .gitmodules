@@ -1,0 +1,3 @@
+[submodule "CorePartition"]
+	path = CorePartition
+	url = https://github.com/solariun/CorePartition.git
