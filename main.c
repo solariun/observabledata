@@ -39,7 +39,6 @@ static void StackOverflowHandler ()
 {
     printf ("Error, Thread#%zu Stack %zu / %zu max\n", CorePartition_GetID(), CorePartition_GetStackSize(), CorePartition_GetMaxStackSize());
 }
-    
 
 DMLayer* pDMLayer = NULL;
 

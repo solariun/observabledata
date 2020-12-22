@@ -109,18 +109,33 @@ void DMLayer_PrintVariables (DMLayer* pDMLayer)
 
     VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.",);
 
-    ObsVariable* pVariable = pDMLayer->pObsVariables;
-
-    printf ("[Listing variables]--------------------------------\n");
-
-    while (pVariable != NULL)
     {
-        printf ("%4zu\t[%-8X]\t%u\n", nCount++, pVariable->nVariableID, pVariable->nVarType);
+        ObsVariable* pVariable = pDMLayer->pObsVariables;
 
-        pVariable = pVariable->pPrev;
+        printf ("[Listing variables]--------------------------------\n");
+
+        while (pVariable != NULL)
+        {
+            printf ("%4zu\t[%-8X]\t%u\t[%s]\n", nCount++, pVariable->nVariableID, pVariable->nVarType, pVariable->pszValue);
+
+            pVariable = pVariable->pPrev;
+        }
+
+        printf ("--------------------------------------------------\n");
+
     }
+}
 
-    printf ("--------------------------------------------------\n");
+ObsVariable* DMLayer_GetVariable (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize)
+{
+    VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", NULL);
+    VERIFY (NULL != pszVariableName && '\0' != pszVariableName[0], "Variable is null or empty.", NULL);
+
+    {
+        uint32_t nTargetID = DMLayer_GetVariableID(pszVariableName, nVariableSize);
+
+        
+    }
 }
 
 DMLayer* DMLayer_CreateInstance()
