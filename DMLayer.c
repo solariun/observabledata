@@ -24,11 +24,23 @@ struct Observable
     Observable* pPrev;
 };
 
+enum __VariableType
+{
+    VAR_TYPE_ERROR = 0,
+    VAR_TYPE_NONE,
+    VAR_TYPE_NUMBER,
+    VAR_TYPE_BIN
+};
 struct ObsVariable
 {
     uint32_t nVariableID;
     uint8_t nLastEventPoint;
-    char* pszValue;
+    char* pBinData;
+    size_t nBinDataSize;
+    size_t nBinAllocSize;
+    uint64_t nValue;
+
+    uint8_t nType;
 
     Observable* pLastObserver;
     ObsVariable* pPrev;
@@ -77,6 +89,67 @@ static int32_t DMLayer_GetVariableID (const char* pszTopic, size_t length)
     return ((int32_t) ((DMLayer_CRC16 ((const uint8_t*)pszTopic, length, 0) << 16) | DMLayer_CRC16 ((const uint8_t*)pszTopic, length, 0x8408)));
 }
 
+static bool DMLayer_CleanUpObserverCallback (ObsVariable* pVariable)
+{
+    bool nReturn = false;
+
+    VERIFY (pVariable != NULL, "Obs Variable is invalid.", false);
+
+    {
+        Observable* pObservable = pVariable->pLastObserver;
+        Observable* pTemp = NULL;
+
+        while (pObservable != NULL)
+        {
+            pTemp = pObservable;
+            pObservable = pObservable->pPrev;
+
+            free (pTemp);
+        }
+
+        nReturn = true;
+    }
+
+    return nReturn;
+}
+
+static bool DMLayer_ResetVariable (ObsVariable* pVariable, bool nCleanBin, bool nCleanObservables)
+{
+    VERIFY (pVariable != NULL, "Invalid variable.", false);
+
+    if (pVariable->pBinData != NULL)
+    {
+        if (nCleanBin == true)
+        {
+            free (pVariable->pBinData);
+            pVariable->pBinData = NULL;
+            pVariable->nBinAllocSize = 0;
+        }
+        else
+        {
+            if (memset ((void*)pVariable->pBinData, 0, pVariable->nBinAllocSize) != pVariable->pBinData)
+            {
+                free (pVariable->pBinData);
+                pVariable->pBinData = NULL;
+                pVariable->nBinAllocSize = 0;
+
+                pVariable->nType = VAR_TYPE_NONE;
+            }
+        }
+    }
+
+    if (nCleanObservables == true && pVariable->pLastObserver != NULL)
+    {
+        VERIFY (DMLayer_CleanUpObserverCallback (pVariable) == true, "Fail to cleanup observables", false);
+    }
+
+    pVariable->nValue = 0;
+    pVariable->nLastEventPoint = 0;
+    pVariable->pLastObserver = NULL;
+
+    return true;
+}
+
 ObsVariable* DMLayer_CreateVariable (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize)
 {
     ObsVariable* pVariable;
@@ -89,9 +162,10 @@ ObsVariable* DMLayer_CreateVariable (DMLayer* pDMLayer, const char* pszVariableN
     VERIFY (DMLayer_GetVariable (pDMLayer, pszVariableName, nVariableSize) == NULL, "Variable already exist, and will not be added", NULL);
 
     pVariable->nVariableID = DMLayer_GetVariableID (pszVariableName, nVariableSize);
-    pVariable->pszValue = NULL;
-    pVariable->nLastEventPoint = 0;
+    pVariable->pBinData = NULL;
     pVariable->pLastObserver = NULL;
+
+    DMLayer_ResetVariable (pVariable, false, false);
 
     pVariable->pPrev = pDMLayer->pObsVariables;
 
@@ -113,7 +187,7 @@ void DMLayer_PrintVariables (DMLayer* pDMLayer)
 
         while (pVariable != NULL)
         {
-            printf ("%4zu\t[%-8X]\t[%s]\n", nCount++, pVariable->nVariableID, pVariable->pszValue);
+            printf ("%4zu\t[%-8X]\t[%s]\n", nCount++, pVariable->nVariableID, pVariable->pBinData);
 
             pVariable = pVariable->pPrev;
         }
@@ -130,26 +204,6 @@ ObsVariable* DMLayer_GetVariable (DMLayer* pDMLayer, const char* pszVariableName
 
     {
         uint32_t nTargetID = DMLayer_GetVariableID (pszVariableName, nVariableSize);
-        ObsVariable* pVariable = pDMLayer->pObsVariables;
-        while (pVariable != NULL)
-        {
-            if (pVariable->nVariableID == nTargetID)
-            {
-                return pVariable;
-            }
-            pVariable = pVariable->pPrev;
-        }
-    }
-
-    return NULL;
-}
-
-static ObsVariable* DMLayer_GetVariableByID (DMLayer* pDMLayer, uint32_t nTargetID)
-{
-    VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", NULL);
-    VERIFY (false != pDMLayer->enable, "Error, DMLayer is disabled.", NULL);
-
-    {
         ObsVariable* pVariable = pDMLayer->pObsVariables;
         while (pVariable != NULL)
         {
@@ -314,40 +368,13 @@ bool DMLayer_RemoveObserverCallback (DMLayer* pDMLayer, const char* pszVariableN
     return nReturn;
 }
 
-bool DMLayer_CleanUpObserverCallback (DMLayer* pDMLayer, uint32_t nVariableID)
+bool DMLayer_CleanUpVariables (DMLayer* pDMLayer)
 {
     bool nReturn = false;
 
     VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", false);
 
-    {
-        ObsVariable* pVariable = NULL;
-
-        if ((pVariable = DMLayer_GetVariableByID (pDMLayer, nVariableID)) != NULL)
-        {
-            Observable* pObservable = pVariable->pLastObserver;
-            Observable* pTemp = NULL;
-
-            while (pObservable != NULL)
-            {
-                pTemp = pObservable;
-                pObservable = pObservable->pPrev;
-
-                free (pTemp);
-            }
-        }
-    }
-
-    return nReturn;
-}
-
-bool DMLayer_CleanUpVariables(DMLayer* pDMLayer)
-{
-    bool nReturn = false;
-
-    VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", false);
-
-    //Disable all interactions
+    // Disable all interactions
     pDMLayer->enable = false;
 
     if (pDMLayer->pObsVariables != NULL)
@@ -361,7 +388,7 @@ bool DMLayer_CleanUpVariables(DMLayer* pDMLayer)
 
             if (pVariable->pLastObserver != NULL)
             {
-                VERIFY (DMLayer_CleanUpObserverCallback (pDMLayer, pVariable->nVariableID) == true, "Logic Error deleting callbacks", false);
+                VERIFY (DMLayer_CleanUpObserverCallback (pVariable) == true, "Logic Error deleting callbacks", false);
             }
 
             pVariable = pVariable->pPrev;
@@ -387,7 +414,33 @@ bool DMLayer_ReleaseInstance (DMLayer* pDMLayer)
     return true;
 }
 
-static size_t DMLayer_Notify(DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, uint8_t nNotifyTpe)
+static size_t DMLayer_Notify (ObsVariable* pVariable, const char* pszVariableName, size_t nVariableSize, uint8_t nNotifyTpe)
+{
+    size_t nReturn = 0;
+
+    VERIFY (NULL != pVariable, "Variable is not valid.", false);
+    VERIFY (NULL != pszVariableName && 0 != nVariableSize, "Variable is null or empty.", false);
+
+    {
+        Observable* pObservable = pVariable->pLastObserver;
+
+        pVariable->nLastEventPoint++;
+
+        while (pObservable != NULL)
+        {
+            // Notifying all observables for a giving Variable
+            pObservable->callback (pszVariableName, nVariableSize, nNotifyTpe);
+
+            nReturn++;
+
+            pObservable = pObservable->pPrev;
+        }
+    }
+
+    return nReturn;
+}
+
+size_t DMLayer_NotifyOnly (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize)
 {
     size_t nReturn = 0;
 
@@ -400,27 +453,158 @@ static size_t DMLayer_Notify(DMLayer* pDMLayer, const char* pszVariableName, siz
 
         if ((pVariable = DMLayer_GetVariable (pDMLayer, pszVariableName, nVariableSize)) != NULL)
         {
-            Observable* pObservable = pVariable->pLastObserver;
-
-            while (pObservable != NULL)
-            {
-                //Notifying all observables for a giving Variable
-                pObservable->callback (pszVariableName, nVariableSize, nNotifyTpe);
-                
-                nReturn++;
-
-                pObservable = pObservable->pPrev;
-            }
+            nReturn = DMLayer_Notify (pVariable, pszVariableName, nVariableSize, OBS_NOTIFY_NOTIFY);
         }
     }
 
     return nReturn;
 }
 
-size_t DMLayer_NotifyOnly (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize)
+bool DMLayer_SetNumber (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, uint64_t nValue)
 {
-    //NOTE: Verifications will be done by the DMLayer_Notify (no need to overcharge it here)
+    VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", false);
+    VERIFY (false != pDMLayer->enable, "Error, DMLayer is disabled.", false);
+    VERIFY (NULL != pszVariableName && 0 != nVariableSize, "Variable is null or empty.", false);
 
-    return DMLayer_Notify (pDMLayer, pszVariableName, nVariableSize, OBS_NOTIFY_NOTIFY);
+    {
+        ObsVariable* pVariable = NULL;
+        uint8_t nNotifyType = OBS_NOTIFY_CHANGED;
+
+        if ((pVariable = DMLayer_GetVariable (pDMLayer, pszVariableName, nVariableSize)) != NULL)
+        {
+            DMLayer_ResetVariable (pVariable, true, false);
+
+            nNotifyType = pVariable->nType == VAR_TYPE_NONE ? OBS_NOTIFY_CREATED : nNotifyType;
+
+            pVariable->nType = VAR_TYPE_NUMBER;
+            pVariable->nValue = (uint64_t)nValue;
+
+            if (pVariable->pLastObserver != NULL)
+            {
+                VERIFY (DMLayer_Notify (pVariable, pszVariableName, nVariableSize, nNotifyType) > 0, "Error notifying observers", false);
+            }
+        }
+    }
+
+    return true;
 }
 
+uint64_t DMLayer_GetNumber (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize)
+{
+    VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", 0);
+    VERIFY (false != pDMLayer->enable, "Error, DMLayer is disabled.", 0);
+    VERIFY (NULL != pszVariableName && 0 != nVariableSize, "Variable is null or empty.", 0);
+
+    {
+        ObsVariable* pVariable = NULL;
+
+        if ((pVariable = DMLayer_GetVariable (pDMLayer, pszVariableName, nVariableSize)) != NULL && pVariable->nType == VAR_TYPE_NUMBER)
+        {
+            return (uint64_t)pVariable->nValue;
+        }
+    }
+
+    return 0;
+}
+
+bool DMLayer_SetBinary (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, const void* pBinData, size_t nBinSize)
+{
+    VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", false);
+    VERIFY (false != pDMLayer->enable, "Error, DMLayer is disabled.", false);
+    VERIFY (NULL != pszVariableName && 0 != nVariableSize, "Variable is null or empty.", false);
+    VERIFY (NULL != pBinData && nBinSize > 0, "Bin data inconsistent.", false);
+
+    {
+        ObsVariable* pVariable = NULL;
+        uint8_t nNotifyType = OBS_NOTIFY_CHANGED;
+
+        if ((pVariable = DMLayer_GetVariable (pDMLayer, pszVariableName, nVariableSize)) != NULL)
+        {
+            DMLayer_ResetVariable (pVariable, false, false);
+
+            pVariable->nType = VAR_TYPE_BIN;
+
+            if (pVariable->pBinData != NULL)
+            {
+                if (pVariable->nBinAllocSize < nBinSize)
+                {
+                    VERIFY ((pVariable->pBinData = realloc (pVariable->pBinData, nBinSize)) == NULL, "", false);
+                    pVariable->nBinAllocSize = nBinSize;
+                }
+            }
+            else
+            {
+                if ((pVariable->pBinData = malloc (nBinSize)) != pBinData)
+                {
+                    DMLayer_ResetVariable (pVariable, false, false);
+                }
+                nNotifyType = OBS_NOTIFY_CREATED;
+            }
+
+            pVariable->nBinDataSize = nBinSize;
+            memcpy ((void*)pVariable->pBinData, (void*)pBinData, nBinSize);
+
+            if (pVariable->pLastObserver != NULL)
+            {
+                VERIFY (DMLayer_Notify (pVariable, pszVariableName, nVariableSize, nNotifyType) == 0, "Error notifying observers", false);
+            }
+        }
+    }
+
+    return true;
+}
+
+bool DMLayer_GetVariableType (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize)
+{
+    VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", false);
+    VERIFY (false != pDMLayer->enable, "Error, DMLayer is disabled.", false);
+    VERIFY (NULL != pszVariableName && 0 != nVariableSize, "Variable is null or empty.", false);
+
+    {
+        ObsVariable* pVariable = NULL;
+
+        if ((pVariable = DMLayer_GetVariable (pDMLayer, pszVariableName, nVariableSize)) != NULL)
+        {
+            return pVariable->nType;
+        }
+    }
+
+    return VAR_TYPE_ERROR;
+}
+
+bool DMLayer_GetVariableBinarySize (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize)
+{
+    VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", 0);
+    VERIFY (false != pDMLayer->enable, "Error, DMLayer is disabled.", 0);
+    VERIFY (NULL != pszVariableName && 0 != nVariableSize, "Variable is null or empty.", 0);
+
+    {
+        ObsVariable* pVariable = NULL;
+
+        if ((pVariable = DMLayer_GetVariable (pDMLayer, pszVariableName, nVariableSize)) != NULL  && pVariable->nType == VAR_TYPE_BIN)
+        {
+            return pVariable->nBinDataSize;
+        }
+    }
+
+    return 0;
+}
+
+bool DMLayer_GetBinary (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, void* pBinData, size_t nBinSize)
+{
+    VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", false);
+    VERIFY (false != pDMLayer->enable, "Error, DMLayer is disabled.", false);
+    VERIFY (NULL != pszVariableName && 0 != nVariableSize, "Variable is null or empty.", false);
+    VERIFY (NULL != pBinData && nBinSize > 0, "Bin data inconsistent.", false);
+
+    {
+        ObsVariable* pVariable = NULL;
+
+        if ((pVariable = DMLayer_GetVariable (pDMLayer, pszVariableName, nVariableSize)) != NULL && pVariable->nType == VAR_TYPE_BIN)
+        {
+            VERIFY (memcpy (pBinData, pVariable->pBinData, nBinSize) == pBinData, "", false);
+        }
+    }
+
+    return false;
+}

@@ -67,6 +67,8 @@ extern void DMLayer_YeldContext();
 
 DMLayer* DMLayer_CreateInstance();
 
+bool DMLayer_ReleaseInstance (DMLayer* pDMLayer);
+
 ObsVariable* DMLayer_CreateVariable (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize);
 
 ObsVariable* DMLayer_GetVariable (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize);
@@ -79,6 +81,17 @@ bool DMLayer_AddObserverCallback (DMLayer* pDMLayer, const char* pszVariableName
 
 size_t DMLayer_NotifyOnly (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize);
 
-bool DMLayer_ReleaseInstance (DMLayer* pDMLayer);
+bool DMLayer_GetBinary (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, void* pBinData, size_t nBinSize);
+
+bool DMLayer_GetVariableBinarySize (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize);
+
+bool DMLayer_GetVariableType (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize);
+
+bool DMLayer_SetBinary (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, const void* pBinData, size_t nBinSize);
+
+uint64_t DMLayer_GetNumber (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize);
+
+bool DMLayer_SetNumber (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, uint64_t nValue);
+
 
 #endif
