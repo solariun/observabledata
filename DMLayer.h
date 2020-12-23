@@ -12,6 +12,7 @@
 #ifndef DMLAYER_H
 #define DMLAYER_H
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,14 +33,15 @@
  * @brief typedefs private strctures 
 */
 
-enum _obType
+enum _notifyType
 {
-    OBS_TYPE_CALLBACK = 0,
-    OBS_TYPE_BLOCKING,
-    OBS_TYPE_CHECKING
+    OBS_NOTIFY_NOTIFY,
+    OBS_NOTIFY_CREATED,
+    OBS_NOTIFY_CHANGED,
+    OBS_NOTIFY_CLEARED
 };
 
-typedef void (*obs_callback_func)(const char*, uint8_t);
+typedef void (*obs_callback_func)(const char*, size_t, uint8_t);
 
 typedef struct Observable Observable;
 
@@ -51,6 +53,7 @@ typedef struct ObsVariable ObsVariable;
 
 typedef struct
 {
+    bool enable;
     ObsVariable* pObsVariables;
 } DMLayer;
 
