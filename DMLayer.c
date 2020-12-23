@@ -20,9 +20,7 @@
 
 struct Observable
 {
-    uint8_t obsType;
-    void* event;
-    bool bEvent;
+    obs_callback_func callback;
     Observable* pPrev;
 };
 
@@ -39,6 +37,8 @@ struct ObsVariable
     char*       pszValue;
     uint8_t     nVarType;
     uint8_t     nLastEventPoint;
+
+    Observable* pLastObserver;
 
     ObsVariable* pPrev;    
 };
@@ -92,7 +92,7 @@ ObsVariable* DMLayer_CreateVariable (DMLayer* pDMLayer, const char* pszVariableN
     ObsVariable* pVariable;
 
     VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", NULL);
-    VERIFY (NULL != pszVariableName && '\0' != pszVariableName[0], "Variable is null or empty.", NULL);
+    VERIFY (NULL != pszVariableName && 0 != nVariableSize, "Variable is null or empty.", NULL);
     VERIFY ((pVariable = malloc (sizeof (ObsVariable))) != NULL, "", NULL);
 
     VERIFY (DMLayer_GetVariable (pDMLayer, pszVariableName, nVariableSize) == NULL, "Variable already exist, and will not be added", NULL);
@@ -101,6 +101,8 @@ ObsVariable* DMLayer_CreateVariable (DMLayer* pDMLayer, const char* pszVariableN
     pVariable->nVarType = VAR_TYPE_NONE;
     pVariable->pszValue = NULL;
     pVariable->nLastEventPoint = 0;
+    pVariable->pLastObserver = NULL;
+
     pVariable->pPrev = pDMLayer->pObsVariables;
 
     pDMLayer->pObsVariables = pVariable;
@@ -134,7 +136,7 @@ void DMLayer_PrintVariables (DMLayer* pDMLayer)
 ObsVariable* DMLayer_GetVariable (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize)
 {
     VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", NULL);
-    VERIFY (NULL != pszVariableName && '\0' != pszVariableName[0], "Variable is null or empty.", NULL);
+    VERIFY (NULL != pszVariableName && 0 != nVariableSize, "Variable is null or empty.", NULL);
 
     {
         uint32_t nTargetID = DMLayer_GetVariableID(pszVariableName, nVariableSize);
@@ -165,13 +167,14 @@ DMLayer* DMLayer_CreateInstance()
 
 bool DMLayer_ObserveVariable (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize)
 {
-    VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", NULL);
-    VERIFY (NULL != pszVariableName && '\0' != pszVariableName[0], "Variable is null or empty.", NULL);
+    bool nReturn = false;
+
+    VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", false);
+    VERIFY (NULL != pszVariableName && 0 != nVariableSize, "Variable is null or empty.", false);
 
     {
         ObsVariable* pVariable;
         uint8_t nLastEvent;
-        bool nReturn = false;
 
         VERIFY ((pVariable = DMLayer_GetVariable (pDMLayer, pszVariableName, nVariableSize)) != NULL, "Variable already exist, and will not be added", NULL);
 
@@ -193,3 +196,61 @@ bool DMLayer_ObserveVariable (DMLayer* pDMLayer, const char* pszVariableName, si
     return nReturn;
 }
 
+bool DMLayer_AddObserverCallback (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, obs_callback_func pFunc)
+{
+    bool nReturn = false;
+
+    VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", false);
+    VERIFY (NULL != pszVariableName && 0 != nVariableSize, "Variable is null or empty.", false);
+    VERIFY (NULL != pFunc, "Function variable is null", false);
+
+    {
+        ObsVariable* pVariable;
+
+        if ((pVariable = DMLayer_GetVariable (pDMLayer, pszVariableName, nVariableSize)) != NULL)
+        {
+            Observable* pObservable = NULL;
+
+            VERIFY ((pObservable = malloc (sizeof (Observable))) != NULL, "", false);
+
+            pObservable->callback = pFunc;
+            pObservable->pPrev = pVariable->pLastObserver;
+
+            pVariable->pLastObserver = pObservable;
+
+            nReturn = true;
+        }
+    }
+
+    return nReturn;
+}
+
+Observable* DMLayer_GetObserverCallback (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, obs_callback_func pFunc)
+{
+    VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", false);
+    VERIFY (NULL != pszVariableName && 0 != nVariableSize, "Variable is null or empty.", false);
+    VERIFY (NULL != pFunc, "Function variable is null", false);
+
+    {
+        ObsVariable* pVariable = NULL;
+
+        if ((pVariable = DMLayer_GetVariable (pDMLayer, pszVariableName, nVariableSize)) != NULL)
+        {
+            Observable* pObservable = pVariable->pLastObserver;
+
+            while (pObservable != NULL)
+            {
+                if ()
+            }
+
+        }
+
+    }
+
+    return NULL;
+}
+
+bool DMLayer_RemoveObserverCallback (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, obs_callback_func pFunc)
+{
+
+}

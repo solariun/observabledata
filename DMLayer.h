@@ -70,4 +70,8 @@ ObsVariable* DMLayer_GetVariable (DMLayer* pDMLayer, const char* pszVariableName
 
 void DMLayer_PrintVariables (DMLayer* pDMLayer);
 
+bool DMLayer_ObserveVariable (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize);
+
+bool DMLayer_AddObserverCallback (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, obs_callback_func pFunc);
+
 #endif
