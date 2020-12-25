@@ -38,10 +38,21 @@ enum _notifyType
     OBS_NOTIFY_NOTIFY,
     OBS_NOTIFY_CREATED,
     OBS_NOTIFY_CHANGED,
-    OBS_NOTIFY_CLEARED
+    OBS_NOTIFY_CLEARED,
+    OBS_NOTIFY_DELETED
 };
 
-typedef void (*obs_callback_func)(const char*, size_t, uint8_t);
+
+enum __VariableType 
+{
+    VAR_TYPE_ERROR = 0,
+    VAR_TYPE_NONE,
+    VAR_TYPE_NUMBER,
+    VAR_TYPE_BINARY
+};
+
+//types: const char* pszVariableName, size_t nVariableName, size_t nUserType, uint8_t nObservableEventType
+typedef void (*obs_callback_func)(const char*, size_t, size_t, uint8_t);
 
 typedef struct Observable Observable;
 
@@ -75,23 +86,25 @@ ObsVariable* DMLayer_GetVariable (DMLayer* pDMLayer, const char* pszVariableName
 
 void DMLayer_PrintVariables (DMLayer* pDMLayer);
 
-bool DMLayer_ObserveVariable (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize);
+bool DMLayer_ObserveVariable (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, size_t* pnUserType);
 
 bool DMLayer_AddObserverCallback (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, obs_callback_func pFunc);
 
-size_t DMLayer_NotifyOnly (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize);
+size_t DMLayer_NotifyOnly (DMLayer* pDMLayer, const char* pszVariableName, size_t nUserType, size_t nVariableSize);
 
 bool DMLayer_GetBinary (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, void* pBinData, size_t nBinSize);
 
-bool DMLayer_GetVariableBinarySize (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize);
+size_t DMLayer_GetVariableBinarySize (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize);
 
-bool DMLayer_GetVariableType (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize);
+uint8_t DMLayer_GetVariableType (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize);
 
-bool DMLayer_SetBinary (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, const void* pBinData, size_t nBinSize);
+size_t DMLayer_GetUserType (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize);
+
+bool DMLayer_SetBinary (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, size_t nUserType, const void* pBinData, size_t nBinSize);
 
 uint64_t DMLayer_GetNumber (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize);
 
-bool DMLayer_SetNumber (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, uint64_t nValue);
+bool DMLayer_SetNumber (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, size_t nUserType, uint64_t nValue);
 
 
 #endif
