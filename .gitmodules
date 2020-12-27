@@ -1,3 +1,3 @@
-[submodule "CorePartition"]
-	path = CorePartition
+[submodule "DMLayer/CorePartition"]
+	path = DMLayer/CorePartition
 	url = https://github.com/solariun/CorePartition.git
