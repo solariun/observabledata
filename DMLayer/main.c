@@ -17,6 +17,11 @@
 #include <time.h>
 #include <unistd.h>
 
+#ifndef bool
+#include <stdbool.h>
+#endif
+
+
 #include "CorePartition/CorePartition.h"
 
 #include "DMLayer.h"
@@ -25,7 +30,7 @@ DMLayer* pDMLayer = NULL;
 
 const char pszProducer[] = "THREAD/PRODUCE/VALUE";
 
-const char pszBinProducer[] = "THREAD/PRODUCE/VALUE";
+const char pszBinProducer[] = "THREAD/PRODUCE/BIN/VALUE";
 
 void Thread_Producer (void* pValue)
 {
@@ -33,9 +38,13 @@ void Thread_Producer (void* pValue)
 
     while (true)
     {
+        bool nResponse = false;
+        
         nRand ++; 
-
-        printf ("[%s (%zu)]: func: (%u), nRand: [%u]\n", __FUNCTION__, CorePartition_GetID (), DMLayer_SetNumber (pDMLayer, pszProducer, strlen (pszProducer), CorePartition_GetID (), nRand), nRand);
+        
+        nResponse =  DMLayer_SetNumber (pDMLayer, pszProducer, strlen (pszProducer), CorePartition_GetID (), nRand);
+        
+        TRACE ("[%s (%zu)]: func: (%u), nRand: [%u]\n", __FUNCTION__, CorePartition_GetID(), nResponse, nRand);
 
         CorePartition_Yield ();
     }
@@ -43,13 +52,19 @@ void Thread_Producer (void* pValue)
 
 int nValues[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-void Consumer_Callback_Notify (const char* pszVariable, size_t nVarSize, size_t nUserType, uint8_t nNotifyType)
+void Consumer_Callback_Notify (DMLayer* pDMLayer, const char* pszVariable, size_t nVarSize, size_t nUserType, uint8_t nNotifyType)
 {
-    nValues[nUserType] = (int)DMLayer_GetNumber (pDMLayer, pszProducer, sizeof (pszProducer));
+    bool nSuccess = false;
+    
+    nValues[nUserType] = (int)DMLayer_GetNumber (pDMLayer, pszVariable, nVarSize, &nSuccess);
 
-    printf ("->[%s]: from: [%zu] Variable: [%s], Type: [%u] -> Value: [%u]\n", __FUNCTION__, nUserType, pszVariable, nNotifyType, nValues[nUserType]);
+    TRACE ("->[%s]: Variable: [%*s]\n", __FUNCTION__, (int) nVarSize, pszVariable);
+    
+    VERIFY (nSuccess == true, "Error, variable is invalid", );
+    
+    TRACE ("->[%s]: from: [%zu], Type: [%u] -> Value: [%u]\n", __FUNCTION__, nUserType, nNotifyType, nValues[nUserType]);
 
-    //DMLayer_SetBinary (pDMLayer, pszBinProducer, strlen (pszBinProducer), (size_t)CorePartition_GetID (), (void*)nValues, sizeof (nValues));
+    DMLayer_SetBinary (pDMLayer, pszBinProducer, strlen (pszBinProducer), (size_t)CorePartition_GetID (), (void*)nValues, sizeof (nValues));
 }
 
 void Thread_Consumer (void* pValue)
@@ -62,7 +77,7 @@ void Thread_Consumer (void* pValue)
 
     while (DMLayer_ObserveVariable (pDMLayer, pszBinProducer, strlen (pszBinProducer), &nUserType) || CorePartition_Yield ())
     {
-        printf ("[%s] From: [%zu] -> type: [%u - bin: %u], size: [%zu]\n",
+        TRACE ("[%s] From: [%zu] -> type: [%u - bin: %u], size: [%zu]\n",
                 __FUNCTION__,
                 nUserType,
                 DMLayer_GetVariableType (pDMLayer, pszBinProducer, strlen (pszBinProducer)),
@@ -103,7 +118,7 @@ static void StackOverflowHandler ()
     printf ("Error, Thread#%zu Stack %zu / %zu max\n", CorePartition_GetID (), CorePartition_GetStackSize (), CorePartition_GetMaxStackSize ());
 }
 
-void DMLayer_YeldContext ()
+void DMLayer_YieldContext ()
 {
     CorePartition_Yield ();
 }
@@ -111,26 +126,35 @@ void DMLayer_YeldContext ()
 int main ()
 {
     // start random
-    srand ((time_t)time (NULL));
+    srand ((unsigned int)(time_t)time (NULL));
 
     VERIFY ((pDMLayer = DMLayer_CreateInstance ()) != NULL, "Error creating DMLayer instance", 1);
 
-    assert (CorePartition_Start (10));
+    assert (CorePartition_Start (20));
 
     assert (CorePartition_SetStackOverflowHandler (StackOverflowHandler));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 200));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 1));
+
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 300));
 
     assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 300));
 
     assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 500));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 500));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 260));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 50));
 
     assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 800));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 800));
+
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 1000));
+
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 60000));
 
     assert (CorePartition_CreateThread (Thread_Consumer, NULL, 500, 200));
-
+    
+    
     CorePartition_Join ();
 
     return 0;
