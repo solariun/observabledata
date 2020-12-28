@@ -35,7 +35,7 @@ const char pszBinProducer[] = "THREAD/PRODUCE/BIN/VALUE";
 
 void Thread_Producer (void* pValue)
 {
-    int nRand = 10;
+    int nRand = 0;
 
     while (true)
     {
@@ -43,7 +43,7 @@ void Thread_Producer (void* pValue)
         
         nRand ++; 
         
-        nResponse =  DMLayer_SetNumber (pDMLayer, pszProducer, strlen (pszProducer), CorePartition_GetID (), nRand);
+        nResponse =  DMLayer_SetNumber (pDMLayer, pszProducer, strlen (pszProducer), CorePartition_GetID (), (dmlnumber) nRand);
         
         NOTRACE ("[%s (%zu)]: func: (%u), nRand: [%u]\n", __FUNCTION__, CorePartition_GetID(), nResponse, nRand);
 

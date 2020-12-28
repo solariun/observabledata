@@ -34,7 +34,7 @@ struct ObsVariable
     char* pBinData;
     size_t nBinDataSize;
     size_t nBinAllocSize;
-    uint64_t nValue;
+    dmlnumber nValue;
 
     size_t nUserType;
 
@@ -480,7 +480,7 @@ size_t DMLayer_NotifyOnly (DMLayer* pDMLayer, const char* pszVariableName, size_
     return nReturn;
 }
 
-bool DMLayer_SetNumber (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, size_t nUserType, uint64_t nValue)
+bool DMLayer_SetNumber (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, size_t nUserType, dmlnumber nValue)
 {
     VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", false);
     VERIFY (false != pDMLayer->enable, "Error, DMLayer is disabled.", false);
@@ -502,9 +502,9 @@ bool DMLayer_SetNumber (DMLayer* pDMLayer, const char* pszVariableName, size_t n
         nNotifyType = pVariable->nType == VAR_TYPE_NONE ? OBS_NOTIFY_CREATED : nNotifyType;
 
         pVariable->nType = VAR_TYPE_NUMBER;
-        pVariable->nValue = (uint64_t)nValue;
+        pVariable->nValue = (dmlnumber) nValue;
 
-        TRACE ("[%s] [%*s]=(%llu)\n", __FUNCTION__, (int) nVariableSize, pszVariableName, pVariable->nValue);
+        TRACE ("[%s] [%*s]=(%f)\n", __FUNCTION__, (int) nVariableSize, pszVariableName, pVariable->nValue);
 
         VERIFY (DMLayer_Notify (pDMLayer, pVariable, pszVariableName, nVariableSize, nUserType, nNotifyType) > 0, "Error notifying observers", false);
     }
@@ -512,7 +512,7 @@ bool DMLayer_SetNumber (DMLayer* pDMLayer, const char* pszVariableName, size_t n
     return true;
 }
 
-uint64_t DMLayer_GetNumber (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, bool* pnSuccess)
+dmlnumber DMLayer_GetNumber (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, bool* pnSuccess)
 {
     if (pnSuccess != NULL)
     {
@@ -528,7 +528,7 @@ uint64_t DMLayer_GetNumber (DMLayer* pDMLayer, const char* pszVariableName, size
 
         if ((pVariable = DMLayer_GetVariable (pDMLayer, pszVariableName, nVariableSize)) != NULL)
         {
-            TRACE ("[%s]:[%*s] pVariable { Value: [%llu], Type: [%u]\n", __FUNCTION__, (int) nVariableSize, pszVariableName, pVariable->nValue, pVariable->nType);
+            TRACE ("[%s]:[%*s] pVariable { Value: [%f], Type: [%u]\n", __FUNCTION__, (int) nVariableSize, pszVariableName, pVariable->nValue, pVariable->nType);
 
             VERIFY (pVariable->nType == VAR_TYPE_NUMBER, "Error, variable is not Number", 0);
             

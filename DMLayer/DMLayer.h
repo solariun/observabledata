@@ -54,6 +54,8 @@ extern "C"
 #endif
 
 
+typedef double dmlnumber;
+
 /**
  * @brief typedefs private structures
 */
@@ -256,7 +258,7 @@ bool DMLayer_SetBinary (DMLayer* pDMLayer, const char* pszVariableName, size_t n
  *
  * @returns If variable exist will return the User defined type for the set value. Otherwise will return ZERO
  */
-uint64_t DMLayer_GetNumber (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, bool* pnSuccess);
+dmlnumber DMLayer_GetNumber (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, bool* pnSuccess);
 
 /**
  * @brief If the variable exist it will create it and set a number as value
@@ -271,7 +273,7 @@ uint64_t DMLayer_GetNumber (DMLayer* pDMLayer, const char* pszVariableName, size
  *
  * @returns return false in case of error
  */
-bool DMLayer_SetNumber (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, size_t nUserType, uint64_t nValue);
+bool DMLayer_SetNumber (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, size_t nUserType, dmlnumber nValue);
 
 
 

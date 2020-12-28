@@ -34,7 +34,7 @@ const char pszBinProducer[] = "THREAD/PRODUCE/BIN/VALUE";
 
 void Thread_Producer (void* pValue)
 {
-    int nRand = 10;
+    int nRand = 0;
 
     while (true)
     {
@@ -42,7 +42,7 @@ void Thread_Producer (void* pValue)
         
         nRand ++; 
         
-        nResponse =  DMLayer_SetNumber (pDMLayer, pszProducer, strlen (pszProducer), CorePartition_GetID (), nRand);
+        nResponse =  DMLayer_SetNumber (pDMLayer, pszProducer, strlen (pszProducer), CorePartition_GetID (), (dmlnumber) nRand);
         
         TRACE ("[%s (%zu)]: func: (%u), nRand: [%u]\n", __FUNCTION__, CorePartition_GetID(), nResponse, nRand);
 
@@ -90,8 +90,12 @@ void Thread_Consumer (void* pValue)
 
             Serial.print ("[");
             Serial.print (__FUNCTION__);
-            Serial.print ("], Values: ");
-                    
+            Serial.print ("], stack (bytes): (");
+            Serial.print (CorePartition_GetStackSize ());
+            Serial.print ("/");
+            Serial.print (CorePartition_GetMaxStackSize ());
+            Serial.print (" max), Values: ");
+                
             for (nCount = 0; nCount < sizeof (nRemoteValues) / sizeof (nRemoteValues[0]); nCount++)
             {
                 Serial.print ("[");
@@ -100,6 +104,7 @@ void Thread_Consumer (void* pValue)
             }
 
             Serial.println ("");
+            Serial.flush ();
         }
     }
 }
