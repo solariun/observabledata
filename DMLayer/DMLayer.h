@@ -4,13 +4,19 @@
  * @brief   Observable variant variable
  * @version 0.1
  * @date    2020-12-22
- * 
+ *
  * @copyright Copyright (c) 2020
- * 
+ *
  */
 
 #ifndef DMLAYER_H
 #define DMLAYER_H
+
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 #ifndef bool
 #include <stdbool.h>
@@ -28,7 +34,7 @@
 
 #ifdef VERIFY
 #undef VERIFY
-#endif 
+#endif
 
 #define VERIFY(term,message,ret) if (!(term)){fprintf (stderr, "OBSVAR:%s[%u](%s):ERROR:[%s]\n", __FUNCTION__, __LINE__, #term, (message [0] == '\0' ? strerror (errno) : message)); return ret;}
 
@@ -42,7 +48,7 @@
 
 
 /**
- * @brief typedefs private strctures 
+ * @brief typedefs private strctures
 */
 
 enum __notifyType
@@ -55,7 +61,7 @@ enum __notifyType
 };
 
 
-enum __VariableType 
+enum __VariableType
 {
     VAR_TYPE_ERROR = 0,
     VAR_TYPE_NONE,
@@ -68,7 +74,7 @@ typedef struct Observable Observable;
 typedef struct ObsVariable ObsVariable;
 
 /**
- * @brief typedefs public strctures 
+ * @brief typedefs public strctures
 */
 
 typedef struct
@@ -81,7 +87,7 @@ typedef struct
 typedef void (*obs_callback_func)(DMLayer*, const char*, size_t, size_t, uint8_t);
 
 /**
- * @brief public Functions 
+ * @brief public Functions
  */
 
 /**
@@ -121,7 +127,7 @@ ObsVariable* DMLayer_CreateVariable (DMLayer* pDMLayer, const char* pszVariableN
  *
  * @param pDMLayer  DMLayer structure pointer
  * @param pszVariableName  C String variable name pointer
- * @param nVariableName Size of the provided variable name
+ * @param nVariableSize  Size of the provided variable name
  *
  * @returns return the pointer of a found variable, on error return NULL.
  */
@@ -260,5 +266,11 @@ uint64_t DMLayer_GetNumber (DMLayer* pDMLayer, const char* pszVariableName, size
  */
 bool DMLayer_SetNumber (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, size_t nUserType, uint64_t nValue);
 
+
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

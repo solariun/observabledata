@@ -27,13 +27,13 @@
 /* Begin PBXFileReference section */
 		0E6C1132259622BF000D5382 /* DMLayer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DMLayer; sourceTree = BUILT_PRODUCTS_DIR; };
 		0E6C1135259622BF000D5382 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
-		0E8EBF932598B2D600CC6295 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		0E8EBF942598B2D600CC6295 /* DMLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DMLayer.h; sourceTree = "<group>"; };
 		0E8EBF962598B2D600CC6295 /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
-		0E8EBF972598B2D600CC6295 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		0E8EBF982598B2D600CC6295 /* DMLayer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = DMLayer.c; sourceTree = "<group>"; };
 		0E8EBF9C2598B36800CC6295 /* CorePartition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CorePartition.h; path = CorePartition/CorePartition.h; sourceTree = "<group>"; };
 		0E8EBF9D2598B36800CC6295 /* CorePartition.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = CorePartition.c; path = CorePartition/CorePartition.c; sourceTree = "<group>"; };
+		0E8EBFAE2599898300CC6295 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		0E8EBFAF2599898300CC6295 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,6 +50,8 @@
 		0E6C1129259622BF000D5382 = {
 			isa = PBXGroup;
 			children = (
+				0E8EBFAE2599898300CC6295 /* LICENSE */,
+				0E8EBFAF2599898300CC6295 /* README.md */,
 				0E6C1134259622BF000D5382 /* DMLayer */,
 				0E6C1133259622BF000D5382 /* Products */,
 			);
@@ -70,9 +72,7 @@
 				0E8EBF9C2598B36800CC6295 /* CorePartition.h */,
 				0E8EBF982598B2D600CC6295 /* DMLayer.c */,
 				0E8EBF942598B2D600CC6295 /* DMLayer.h */,
-				0E8EBF972598B2D600CC6295 /* LICENSE */,
 				0E8EBF962598B2D600CC6295 /* makefile */,
-				0E8EBF932598B2D600CC6295 /* README.md */,
 				0E6C1135259622BF000D5382 /* main.c */,
 			);
 			path = DMLayer;

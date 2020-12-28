@@ -17,13 +17,17 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <string>
+
 #ifndef bool
 #include <stdbool.h>
 #endif
 
-#include "CorePartition/CorePartition.h"
+#include "CorePartition.h"
 
 #include "DMLayer.h"
+
+#include <arduino.h>
 
 DMLayer* pDMLayer = NULL;
 
@@ -87,34 +91,47 @@ void Thread_Consumer (void* pValue)
         {
             DMLayer_GetBinary (pDMLayer, pszBinProducer, strlen (pszBinProducer), nRemoteValues, sizeof (nRemoteValues));
 
-            printf ("[%s] Values: ", __FUNCTION__);
-
+            Serial.print ("[");
+            Serial.print (__FUNCTION__);
+            Serial.print ("], Values: ");
+                    
             for (nCount = 0; nCount < sizeof (nRemoteValues) / sizeof (nRemoteValues[0]); nCount++)
             {
-                printf ("[%u] ", nRemoteValues[nCount]);
+                Serial.print ("[");
+                Serial.print (nRemoteValues[nCount]);
+                Serial.print ("] ");
             }
 
-            printf ("\n");
+            Serial.println ("");
         }
     }
 }
 
-void CorePartition_SleepTicks (uint32_t nSleepTime)
+/// Espcializing CorePartition Tick as Milleseconds
+uint32_t CorePartition_GetCurrentTick ()
 {
-    usleep ((useconds_t)nSleepTime * 1000);
+    return (uint32_t)millis ();
 }
 
-uint32_t CorePartition_GetCurrentTick (void)
+/// Specializing CorePartition Idle time
+/// @param nSleepTime How log the sleep will lest
+void CorePartition_SleepTicks (uint32_t nSleepTime)
 {
-    struct timeval tp;
-    gettimeofday (&tp, NULL);
-
-    return (uint32_t)tp.tv_sec * 1000 + tp.tv_usec / 1000;  // get current timestamp in milliseconds
+    delay (nSleepTime);
 }
 
 static void StackOverflowHandler ()
 {
-    printf ("Error, Thread#%zu Stack %zu / %zu max\n", CorePartition_GetID (), CorePartition_GetStackSize (), CorePartition_GetMaxStackSize ());
+    Serial.print ("[");
+    Serial.print (__FUNCTION__);
+    Serial.print ("] Thread #");
+    Serial.print (CorePartition_GetID ());
+    Serial.print (", Stack: ");
+    Serial.print (CorePartition_GetStackSize ());
+    Serial.print ("/");
+    Serial.print (CorePartition_GetMaxStackSize ());
+    Serial.print (" bytes max.");
+    Serial.flush ();
 }
 
 void DMLayer_YieldContext ()
@@ -122,39 +139,64 @@ void DMLayer_YieldContext ()
     CorePartition_Yield ();
 }
 
-int main ()
+void setup ()
 {
+    // Initialize serial and wait for port to open:
+     Serial.begin (115200);
+
+     while (!Serial)
+     {
+     };
+
+     delay (1000);
+
+     Serial.print ("DMLayer Demo");
+     Serial.println (CorePartition_version);
+     Serial.println ("");
+
+     Serial.println ("Starting up Threads....");
+     Serial.flush ();
+     Serial.flush ();
+    
     // start random
     srand ((unsigned int)(time_t)time (NULL));
 
-    VERIFY ((pDMLayer = DMLayer_CreateInstance ()) != NULL, "Error creating DMLayer instance", 1);
+    VERIFY ((pDMLayer = DMLayer_CreateInstance ()) != NULL, "Error creating DMLayer instance", );
 
-    assert (CorePartition_Start (20));
+    Serial.println ("DMLayer Created....");
+    Serial.flush ();
+    Serial.flush ();
+
+    assert (CorePartition_Start (11));
 
     assert (CorePartition_SetStackOverflowHandler (StackOverflowHandler));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 1));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 100, 1));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 300));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 100, 300));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 300));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 100, 300));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 500));
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 500));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 100, 500));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 100, 500));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 50));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 100, 50));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 800));
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 800));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 100, 800));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 100, 800));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 1000));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 100, 1000));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 60000));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 100, 60000));
 
-    assert (CorePartition_CreateThread (Thread_Consumer, NULL, 500, 200));
+    VERIFY (CorePartition_CreateThread (Thread_Consumer, NULL, 150, 200), "Error creating consumer thread", );
     
     
     CorePartition_Join ();
 
-    return 0;
+}
+
+void loop()
+{
+    
 }

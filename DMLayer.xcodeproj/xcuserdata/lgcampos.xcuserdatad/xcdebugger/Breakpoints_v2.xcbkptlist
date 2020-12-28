@@ -23,22 +23,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "E5144307-22A8-4716-A96D-71DABB8B6F02"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "DMLayer/main.c"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "59"
-            endingLineNumber = "59"
-            landmarkName = "Consumer_Callback_Notify(pDMLayer, pszVariable, nVarSize, nUserType, nNotifyType)"
-            landmarkType = "9">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "53A9D302-4BBF-4C53-82B5-D38A9AFDB2CB"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -65,22 +49,6 @@
             startingLineNumber = "236"
             endingLineNumber = "236"
             landmarkName = "DMLayer_ObserveVariable(pDMLayer, pszVariableName, nVariableSize, pnUserType)"
-            landmarkType = "9">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "4FA486B4-2E1A-4137-9A1C-AF6DC13B42E3"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "DMLayer/main.c"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "72"
-            endingLineNumber = "72"
-            landmarkName = "Thread_Consumer(pValue)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>

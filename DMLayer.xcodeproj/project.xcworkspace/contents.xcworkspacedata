@@ -1,6 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Workspace
    version = "1.0">
+   <Group
+      location = "group:../arduino"
+      name = "arduino">
+      <FileRef
+         location = "group:DMLayer.c">
+      </FileRef>
+      <FileRef
+         location = "group:arduino.ino"
+         assignedFileDataType = "public.c-plus-plus-source">
+      </FileRef>
+      <FileRef
+         location = "group:CorePartition.c">
+      </FileRef>
+      <FileRef
+         location = "group:DMLayer.h">
+      </FileRef>
+      <FileRef
+         location = "group:CorePartition.o">
+      </FileRef>
+      <FileRef
+         location = "group:CorePartition.h">
+      </FileRef>
+   </Group>
    <FileRef
       location = "self:">
    </FileRef>
