@@ -135,23 +135,23 @@ int main ()
 
     assert (CorePartition_SetStackOverflowHandler (StackOverflowHandler));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 1));
+    assert (CorePartition_CreateThread (Thread_Producer, NULL, 500, 1));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 300));
+    assert (CorePartition_CreateThread (Thread_Producer, NULL, 500, 300));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 300));
+    assert (CorePartition_CreateThread (Thread_Producer, NULL, 500, 300));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 500));
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 500));
+    assert (CorePartition_CreateThread (Thread_Producer, NULL, 500, 500));
+    assert (CorePartition_CreateThread (Thread_Producer, NULL, 500, 500));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 50));
+    assert (CorePartition_CreateThread (Thread_Producer, NULL, 500, 50));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 800));
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 800));
+    assert (CorePartition_CreateThread (Thread_Producer, NULL, 500, 800));
+    assert (CorePartition_CreateThread (Thread_Producer, NULL, 500, 800));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 1000));
+    assert (CorePartition_CreateThread (Thread_Producer, NULL, 500, 1000));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 500, 60000));
+    assert (CorePartition_CreateThread (Thread_Producer, NULL, 500, 60000));
 
     assert (CorePartition_CreateThread (Thread_Consumer, NULL, 500, 200));
     
