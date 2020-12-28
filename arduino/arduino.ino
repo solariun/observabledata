@@ -181,23 +181,23 @@ void setup ()
 
     assert (CorePartition_SetStackOverflowHandler (StackOverflowHandler));
 
-    assert (CorePartition_CreateThreadThread (Thread_Producer, NULL, STACK_PRODUCER, 1));
+    assert (CorePartition_CreateThread (Thread_Producer, NULL, STACK_PRODUCER, 1));
 
-    assert (CorePartition_CreateThreadThread (Thread_Producer, NULL, STACK_PRODUCER, 300));
+    assert (CorePartition_CreateThread (Thread_Producer, NULL, STACK_PRODUCER, 300));
 
-    assert (CorePartition_CreateThreadThread (Thread_Producer, NULL, STACK_PRODUCER, 300));
+    assert (CorePartition_CreateThread (Thread_Producer, NULL, STACK_PRODUCER, 300));
 
-    assert (CorePartition_CreateThreadThread (Thread_Producer, NULL, STACK_PRODUCER, 500));
-    assert (CorePartition_CreateThreadThread (Thread_Producer, NULL, STACK_PRODUCER, 500));
+    assert (CorePartition_CreateThread (Thread_Producer, NULL, STACK_PRODUCER, 500));
+    assert (CorePartition_CreateThread (Thread_Producer, NULL, STACK_PRODUCER, 500));
 
-    assert (CorePartition_CreateThreadThread (Thread_Producer, NULL, STACK_PRODUCER, 50));
+    assert (CorePartition_CreateThread (Thread_Producer, NULL, STACK_PRODUCER, 50));
 
-    assert (CorePartition_CreateThreadThread (Thread_Producer, NULL, STACK_PRODUCER, 800));
-    assert (CorePartition_CreateThreadThread (Thread_Producer, NULL, STACK_PRODUCER, 800));
+    assert (CorePartition_CreateThread (Thread_Producer, NULL, STACK_PRODUCER, 800));
+    assert (CorePartition_CreateThread (Thread_Producer, NULL, STACK_PRODUCER, 800));
 
-    assert (CorePartition_CreateThreadThread (Thread_Producer, NULL, STACK_PRODUCER, 1000));
+    assert (CorePartition_CreateThread (Thread_Producer, NULL, STACK_PRODUCER, 1000));
 
-    assert (CorePartition_CreateThreadThread (Thread_Producer, NULL, STACK_PRODUCER, 60000));
+    assert (CorePartition_CreateThread (Thread_Producer, NULL, STACK_PRODUCER, 60000));
 
     VERIFY (CorePartition_CreateThread (Thread_Consumer, NULL, STACK_CONSUMER, 200), "Error creating consumer thread", );
     
