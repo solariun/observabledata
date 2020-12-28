@@ -13,11 +13,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
-
-#include <string>
 
 #ifndef bool
 #include <stdbool.h>
@@ -167,29 +164,37 @@ void setup ()
     Serial.flush ();
     Serial.flush ();
 
+#ifdef __AVR__
+#define STACK_PRODUCER sizeof(size_t) * 10
+#define STACK_CONSUMER sizeof(size_t) * 35
+#else
+#define STACK_PRODUCER sizeof(size_t) * 20
+#define STACK_CONSUMER sizeof(size_t) * 45
+#endif
+    
     assert (CorePartition_Start (11));
 
     assert (CorePartition_SetStackOverflowHandler (StackOverflowHandler));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 100, 1));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, STACK_PRODUCER, 1));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 100, 300));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, STACK_PRODUCER, 300));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 100, 300));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, STACK_PRODUCER, 300));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 100, 500));
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 100, 500));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, STACK_PRODUCER, 500));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, STACK_PRODUCER, 500));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 100, 50));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, STACK_PRODUCER, 50));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 100, 800));
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 100, 800));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, STACK_PRODUCER, 800));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, STACK_PRODUCER, 800));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 100, 1000));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, STACK_PRODUCER, 1000));
 
-    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, 100, 60000));
+    assert (CorePartition_CreateSecureThread (Thread_Producer, NULL, STACK_PRODUCER, 60000));
 
-    VERIFY (CorePartition_CreateThread (Thread_Consumer, NULL, 150, 200), "Error creating consumer thread", );
+    VERIFY (CorePartition_CreateThread (Thread_Consumer, NULL, STACK_CONSUMER, 200), "Error creating consumer thread", );
     
     
     CorePartition_Join ();

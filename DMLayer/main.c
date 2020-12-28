@@ -9,6 +9,8 @@
  *
  */
 
+#define __DEBUG__ 1
+
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -43,7 +45,7 @@ void Thread_Producer (void* pValue)
         
         nResponse =  DMLayer_SetNumber (pDMLayer, pszProducer, strlen (pszProducer), CorePartition_GetID (), nRand);
         
-        TRACE ("[%s (%zu)]: func: (%u), nRand: [%u]\n", __FUNCTION__, CorePartition_GetID(), nResponse, nRand);
+        NOTRACE ("[%s (%zu)]: func: (%u), nRand: [%u]\n", __FUNCTION__, CorePartition_GetID(), nResponse, nRand);
 
         CorePartition_Yield ();
     }
@@ -57,11 +59,11 @@ void Consumer_Callback_Notify (DMLayer* pDMLayer, const char* pszVariable, size_
     
     nValues[nUserType] = (int)DMLayer_GetNumber (pDMLayer, pszVariable, nVarSize, &nSuccess);
 
-    TRACE ("->[%s]: Variable: [%*s]\n", __FUNCTION__, (int) nVarSize, pszVariable);
+    NOTRACE ("->[%s]: Variable: [%*s]\n", __FUNCTION__, (int) nVarSize, pszVariable);
     
     VERIFY (nSuccess == true, "Error, variable is invalid", );
     
-    TRACE ("->[%s]: from: [%zu], Type: [%u] -> Value: [%u]\n", __FUNCTION__, nUserType, nNotifyType, nValues[nUserType]);
+    NOTRACE ("->[%s]: from: [%zu], Type: [%u] -> Value: [%u]\n", __FUNCTION__, nUserType, nNotifyType, nValues[nUserType]);
 
     DMLayer_SetBinary (pDMLayer, pszBinProducer, strlen (pszBinProducer), (size_t)CorePartition_GetID (), (void*)nValues, sizeof (nValues));
 }
@@ -76,7 +78,7 @@ void Thread_Consumer (void* pValue)
 
     while (DMLayer_ObserveVariable (pDMLayer, pszBinProducer, strlen (pszBinProducer), &nUserType) || CorePartition_Yield ())
     {
-        TRACE ("[%s] From: [%zu] -> type: [%u - bin: %u], size: [%zu]\n",
+        NOTRACE ("[%s] From: [%zu] -> type: [%u - bin: %u], size: [%zu]\n",
                 __FUNCTION__,
                 nUserType,
                 DMLayer_GetVariableType (pDMLayer, pszBinProducer, strlen (pszBinProducer)),

@@ -36,19 +36,26 @@ extern "C"
 #undef VERIFY
 #endif
 
+
+#define NOTRACE 1 ? (void) 0 : (void) printf
+
+#ifdef __DEBUG__
 #define VERIFY(term,message,ret) if (!(term)){fprintf (stderr, "OBSVAR:%s[%u](%s):ERROR:[%s]\n", __FUNCTION__, __LINE__, #term, (message [0] == '\0' ? strerror (errno) : message)); return ret;}
 
 #define YYTRACE printf
-
-#ifdef __DEBUG__
 #define TRACE YYTRACE
+
 #else
-#define TRACE if (false) printf
+
+#define VERIFY(term,message,ret) if (!(term)){return ret;}
+#define YYTRACE NOTRACE
+#define TRACE YYTRACE
+
 #endif
 
 
 /**
- * @brief typedefs private strctures
+ * @brief typedefs private structures
 */
 
 enum __notifyType
