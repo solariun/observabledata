@@ -165,11 +165,37 @@ bool DMLayer_ObserveVariable (DMLayer* pDMLayer, const char* pszVariableName, si
  * @param pDMLayer  DMLayer structure pointer
  * @param pszVariableName   C string variable name
  * @param nVariableSize Size of the provided variable name
- * @param pFunc typedef'ed function to be used as observable callback
+ * @param pFunc Typedef'ed function to be used as observable callback
  *
  * @returns Return false in case of error or variable not found.
  */
 bool DMLayer_AddObserverCallback (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, obs_callback_func pFunc);
+
+/**
+ * @brief Set Observable enable state
+ *
+ * @param pDMLayer  DMLayer structure pointer
+ * @param pszVariableName   C string variable name
+ * @param nVariableSize Size of the provided variable name
+ * @param pFunc Typedef'ed function to be used as observable callback
+ * @param bEnable   Enable state to be set
+ *
+ * @returns Return false in case of error or variable not found or Observable callback not found
+ */
+bool DMLayer_SetObservableCallback (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, obs_callback_func pFunc, bool bEnable);
+
+/**
+ * @brief Get Observable enable state
+ *
+ * @param pDMLayer  DMLayer structure pointer
+ * @param pszVariableName   C string variable name
+ * @param nVariableSize Size of the provided variable name
+ * @param pFunc Typedef'ed function to be used as observable callback
+ * @param pbSuccess Return the execution state if different of NULL.
+ *
+ * @returns Return false in case of error or variable not found or Observable callback not found
+ */
+bool DMLayer_IsObservableCallbackEnable (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, obs_callback_func pFunc, bool* pbSuccess);
 
 /**
  * @brief Only send a notification only event regardless if the variable has data or type of data

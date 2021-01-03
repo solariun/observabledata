@@ -23,7 +23,7 @@
 
 struct Observable
 {
-    //bool bEnable;  //TODO::implement 
+    bool bEnable;
     obs_callback_func callback;
     Observable* pPrev;
 };
@@ -230,7 +230,6 @@ DMLayer* DMLayer_CreateInstance ()
     return pDMLayer;
 }
 
-//TODO:: return number os last changes
 bool DMLayer_ObserveVariable (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, size_t* pnUserType)
 {
     bool nReturn = false;
@@ -273,42 +272,7 @@ bool DMLayer_ObserveVariable (DMLayer* pDMLayer, const char* pszVariableName, si
     return nReturn;
 }
 
-bool DMLayer_AddObserverCallback (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, obs_callback_func pFunc)
-{
-    bool nReturn = false;
-
-    VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", false);
-    VERIFY (false != pDMLayer->enable, "Error, DMLayer is disabled.", false);
-    VERIFY (NULL != pszVariableName && 0 != nVariableSize, "Variable is null or empty.", false);
-    VERIFY (NULL != pFunc, "Function variable is null", false);
-
-    {
-        ObsVariable* pVariable;
-        Observable* pObservable = NULL;
-
-        if ((pVariable = DMLayer_GetVariable (pDMLayer, pszVariableName, nVariableSize)) == NULL)
-        {
-            VERIFY (pVariable = DMLayer_CreateVariable (pDMLayer, pszVariableName, nVariableSize), "Error creating Variable.", false);
-            pVariable->nType = VAR_TYPE_NONE;
-        }
-        
-        VERIFY ((pObservable = malloc (sizeof (Observable))) != NULL, "", false);
-
-        pObservable->callback = pFunc;
-        pObservable->pPrev = pVariable->pLastObserver;
-
-        pVariable->pLastObserver = pObservable;
-
-        TRACE ("[%s]: (%8zX) Adding observable callback: [%s](%8X) -> fund: [%8zX], pLastObservable: [%8zX]\n", __FUNCTION__, (size_t) pVariable, pszVariableName, pVariable->nVariableID, (size_t) pFunc, (size_t) pVariable->pLastObserver);
-        DMLayer_PrintVariables (pDMLayer);
-
-        nReturn = true;
-    }
-
-    return nReturn;
-}
-
-Observable* DMLayer_GetObserverCallback (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, obs_callback_func pFunc)
+static Observable* DMLayer_GetObserverCallback (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, obs_callback_func pFunc)
 {
     VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", false);
     VERIFY (false != pDMLayer->enable, "Error, DMLayer is disabled.", NULL);
@@ -334,6 +298,91 @@ Observable* DMLayer_GetObserverCallback (DMLayer* pDMLayer, const char* pszVaria
 
     return NULL;
 }
+
+bool DMLayer_AddObserverCallback (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, obs_callback_func pFunc)
+{
+    bool nReturn = false;
+
+    VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", false);
+    VERIFY (false != pDMLayer->enable, "Error, DMLayer is disabled.", false);
+    VERIFY (NULL != pszVariableName && 0 != nVariableSize, "Variable is null or empty.", false);
+    VERIFY (NULL != pFunc, "Function variable is null", false);
+
+    {
+        ObsVariable* pVariable;
+        Observable* pObservable = NULL;
+
+        if ((pVariable = DMLayer_GetVariable (pDMLayer, pszVariableName, nVariableSize)) == NULL)
+        {
+            VERIFY (pVariable = DMLayer_CreateVariable (pDMLayer, pszVariableName, nVariableSize), "Error creating Variable.", false);
+            pVariable->nType = VAR_TYPE_NONE;
+        }
+        
+        VERIFY (DMLayer_GetObserverCallback(pDMLayer, pszVariableName, nVariableSize, pFunc) == NULL, "Error, Variable already exist", false);
+        
+        VERIFY ((pObservable = malloc (sizeof (Observable))) != NULL, "", false);
+
+        pObservable->callback = pFunc;
+        pObservable->bEnable = true;
+        pObservable->pPrev = pVariable->pLastObserver;
+
+        pVariable->pLastObserver = pObservable;
+
+        TRACE ("[%s]: (%8zX) Adding observable callback: [%s](%8X) -> fund: [%8zX], pLastObservable: [%8zX]\n", __FUNCTION__, (size_t) pVariable, pszVariableName, pVariable->nVariableID, (size_t) pFunc, (size_t) pVariable->pLastObserver);
+        DMLayer_PrintVariables (pDMLayer);
+
+        nReturn = true;
+    }
+
+    return nReturn;
+}
+
+bool DMLayer_SetObservableCallback (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, obs_callback_func pFunc, bool bEnable)
+{
+    bool bReturn = false;
+    
+    VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", false);
+    VERIFY (false != pDMLayer->enable, "Error, DMLayer is disabled.", NULL);
+    VERIFY (NULL != pszVariableName && 0 != nVariableSize, "Variable is null or empty.", false);
+    VERIFY (NULL != pFunc, "Function variable is null", false);
+    
+    {
+        Observable* pObservable = NULL;
+        
+        VERIFY ((pObservable = DMLayer_GetObserverCallback(pDMLayer, pszVariableName, nVariableSize, pFunc)) != NULL, "Error, Variable does not exist", false);
+        
+        pObservable->bEnable = bEnable;
+        
+        bReturn = true;
+    }
+    
+    return bReturn;
+}
+
+bool DMLayer_IsObservableCallbackEnable (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, obs_callback_func pFunc, bool* pbSuccess)
+{
+    bool bReturn = false;
+    
+    if (pbSuccess != NULL) *pbSuccess = false;
+    
+    VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", false);
+    VERIFY (false != pDMLayer->enable, "Error, DMLayer is disabled.", NULL);
+    VERIFY (NULL != pszVariableName && 0 != nVariableSize, "Variable is null or empty.", false);
+    VERIFY (NULL != pFunc, "Function variable is null", false);
+    
+    {
+        Observable* pObservable = NULL;
+        
+        VERIFY ((pObservable = DMLayer_GetObserverCallback(pDMLayer, pszVariableName, nVariableSize, pFunc)) != NULL, "Error, Variable does not exist", false);
+        
+        bReturn = pObservable->bEnable;
+        
+        if (pbSuccess != NULL) *pbSuccess = true;
+    }
+    
+    return bReturn;
+}
+
 
 bool DMLayer_RemoveObserverCallback (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, obs_callback_func pFunc)
 {
@@ -450,8 +499,11 @@ static size_t DMLayer_Notify (DMLayer* pDMLayer, ObsVariable* pVariable, const c
         {
             TRACE ("[%s] Callback for [%*s]-> (%8zX)\n", __FUNCTION__, (int)nVariableSize, pszVariableName, (size_t)pObservable->callback);
 
-            // Notifying all observables for a giving Variable
-            pObservable->callback (pDMLayer, pszVariableName, nVariableSize, nUserType, nNotifyTpe);
+            if (pObservable->bEnable)
+            {
+                // Notifying all observables for a giving Variable
+                pObservable->callback (pDMLayer, pszVariableName, nVariableSize, nUserType, nNotifyTpe);
+            }
 
             nReturn++;
 
@@ -516,10 +568,9 @@ bool DMLayer_SetNumber (DMLayer* pDMLayer, const char* pszVariableName, size_t n
 
 dmlnumber DMLayer_GetNumber (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, bool* pnSuccess)
 {
-    if (pnSuccess != NULL)
-    {
-        *pnSuccess = false;
-    }
+    dmlnumber dmlValue = 0;
+    
+    if (pnSuccess != NULL) *pnSuccess = false;
     
     VERIFY (NULL != pDMLayer, "Error, DMLayer is invalid.", 0);
     VERIFY (false != pDMLayer->enable, "Error, DMLayer is disabled.", 0);
@@ -534,16 +585,13 @@ dmlnumber DMLayer_GetNumber (DMLayer* pDMLayer, const char* pszVariableName, siz
 
             VERIFY (pVariable->nType == VAR_TYPE_NUMBER, "Error, variable is not Number", 0);
             
-            if (pnSuccess != NULL)
-            {
-                *pnSuccess = true;
-            }
+            if (pnSuccess != NULL) *pnSuccess = true;
 
-            return pVariable->nValue;
+            dmlValue = pVariable->nValue;
         }
     }
 
-    return 0;
+    return dmlValue;
 }
 
 bool DMLayer_SetBinary (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, size_t nUserType, const void* pBinData, size_t nBinSize)

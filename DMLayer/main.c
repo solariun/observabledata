@@ -157,6 +157,8 @@ int main ()
     
     
     CorePartition_Join ();
-
+    
+    DMLayer_ReleaseInstance(pDMLayer);
+    
     return 0;
 }

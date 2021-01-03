@@ -14,8 +14,8 @@
             filePath = "DMLayer/DMLayer.c"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "434"
-            endingLineNumber = "434"
+            startingLineNumber = "483"
+            endingLineNumber = "483"
             landmarkName = "DMLayer_Notify(pDMLayer, pVariable, pszVariableName, nVariableSize, nUserType, nNotifyTpe)"
             landmarkType = "9">
          </BreakpointContent>
@@ -30,8 +30,8 @@
             filePath = "DMLayer/DMLayer.c"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "528"
-            endingLineNumber = "528"
+            startingLineNumber = "579"
+            endingLineNumber = "579"
             landmarkName = "DMLayer_GetNumber(pDMLayer, pszVariableName, nVariableSize, pnSuccess)"
             landmarkType = "9">
          </BreakpointContent>
@@ -46,9 +46,25 @@
             filePath = "DMLayer/DMLayer.c"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "238"
-            endingLineNumber = "238"
+            startingLineNumber = "237"
+            endingLineNumber = "237"
             landmarkName = "DMLayer_ObserveVariable(pDMLayer, pszVariableName, nVariableSize, pnUserType)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "00B92482-B6FF-418D-BC88-85B7FC74C553"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "DMLayer/main.c"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "161"
+            endingLineNumber = "161"
+            landmarkName = "main()"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
