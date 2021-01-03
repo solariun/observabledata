@@ -23,6 +23,7 @@
 
 struct Observable
 {
+    //bool bEnable;  //TODO::implement 
     obs_callback_func callback;
     Observable* pPrev;
 };
@@ -229,6 +230,7 @@ DMLayer* DMLayer_CreateInstance ()
     return pDMLayer;
 }
 
+//TODO:: return number os last changes
 bool DMLayer_ObserveVariable (DMLayer* pDMLayer, const char* pszVariableName, size_t nVariableSize, size_t* pnUserType)
 {
     bool nReturn = false;

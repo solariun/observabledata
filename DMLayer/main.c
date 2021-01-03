@@ -31,7 +31,7 @@ DMLayer* pDMLayer = NULL;
 
 const char pszProducer[] = "THREAD/PRODUCE/VALUE";
 
-const char pszBinProducer[] = "THREAD/PRODUCE/BIN/VALUE";
+const char pszBinConsumer[] = "THREAD/CONSUME/BIN/VALUE";
 
 void Thread_Producer (void* pValue)
 {
@@ -65,7 +65,7 @@ void Consumer_Callback_Notify (DMLayer* pDMLayer, const char* pszVariable, size_
     
     NOTRACE ("->[%s]: from: [%zu], Type: [%u] -> Value: [%u]\n", __FUNCTION__, nUserType, nNotifyType, nValues[nUserType]);
 
-    DMLayer_SetBinary (pDMLayer, pszBinProducer, strlen (pszBinProducer), (size_t)CorePartition_GetID (), (void*)nValues, sizeof (nValues));
+    DMLayer_SetBinary (pDMLayer, pszBinConsumer, strlen (pszBinConsumer), (size_t)CorePartition_GetID (), (void*)nValues, sizeof (nValues));
 }
 
 void Thread_Consumer (void* pValue)
@@ -76,18 +76,18 @@ void Thread_Consumer (void* pValue)
     int nCount = 0;
     size_t nUserType = 0;
 
-    while (DMLayer_ObserveVariable (pDMLayer, pszBinProducer, strlen (pszBinProducer), &nUserType) || CorePartition_Yield ())
+    while (DMLayer_ObserveVariable (pDMLayer, pszBinConsumer, strlen (pszBinConsumer), &nUserType) || CorePartition_Yield ())
     {
         NOTRACE ("[%s] From: [%zu] -> type: [%u - bin: %u], size: [%zu]\n",
                 __FUNCTION__,
                 nUserType,
-                DMLayer_GetVariableType (pDMLayer, pszBinProducer, strlen (pszBinProducer)),
+                DMLayer_GetVariableType (pDMLayer, pszBinConsumer, strlen (pszBinConsumer)),
                 (uint8_t)VAR_TYPE_BINARY,
-                DMLayer_GetVariableBinarySize (pDMLayer, pszBinProducer, strlen (pszBinProducer)));
+                DMLayer_GetVariableBinarySize (pDMLayer, pszBinConsumer, strlen (pszBinConsumer)));
 
-        if (DMLayer_GetVariableType (pDMLayer, pszBinProducer, strlen (pszBinProducer)) == VAR_TYPE_BINARY)
+        if (DMLayer_GetVariableType (pDMLayer, pszBinConsumer, strlen (pszBinConsumer)) == VAR_TYPE_BINARY)
         {
-            DMLayer_GetBinary (pDMLayer, pszBinProducer, strlen (pszBinProducer), nRemoteValues, sizeof (nRemoteValues));
+            DMLayer_GetBinary (pDMLayer, pszBinConsumer, strlen (pszBinConsumer), nRemoteValues, sizeof (nRemoteValues));
 
             printf ("[%s] Values: ", __FUNCTION__);
 
@@ -135,7 +135,7 @@ int main ()
 
     assert (CorePartition_SetStackOverflowHandler (StackOverflowHandler));
 
-    assert (CorePartition_CreateThread (Thread_Producer, NULL, 500, 1));
+    assert (CorePartition_CreateThread (Thread_Producer, NULL, 500, 0));
 
     assert (CorePartition_CreateThread (Thread_Producer, NULL, 500, 300));
 

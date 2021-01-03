@@ -14,8 +14,8 @@
             filePath = "DMLayer/DMLayer.c"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "432"
-            endingLineNumber = "432"
+            startingLineNumber = "434"
+            endingLineNumber = "434"
             landmarkName = "DMLayer_Notify(pDMLayer, pVariable, pszVariableName, nVariableSize, nUserType, nNotifyTpe)"
             landmarkType = "9">
          </BreakpointContent>
@@ -30,8 +30,8 @@
             filePath = "DMLayer/DMLayer.c"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "526"
-            endingLineNumber = "526"
+            startingLineNumber = "528"
+            endingLineNumber = "528"
             landmarkName = "DMLayer_GetNumber(pDMLayer, pszVariableName, nVariableSize, pnSuccess)"
             landmarkType = "9">
          </BreakpointContent>
@@ -46,8 +46,8 @@
             filePath = "DMLayer/DMLayer.c"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "236"
-            endingLineNumber = "236"
+            startingLineNumber = "238"
+            endingLineNumber = "238"
             landmarkName = "DMLayer_ObserveVariable(pDMLayer, pszVariableName, nVariableSize, pnUserType)"
             landmarkType = "9">
          </BreakpointContent>
